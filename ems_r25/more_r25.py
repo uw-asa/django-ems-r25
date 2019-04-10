@@ -54,6 +54,16 @@ def put_resource(url, body):
 
     response = R25_DAO().putURL(url, headers, body)
     if response.status != 200:
+        try:
+            tree = etree.fromstring(response.data.strip())
+            proc_error = tree.xpath("//r25:proc_error", namespaces=nsmap)[0].text
+            tree = etree.fromstring(proc_error)
+            messages = tree.xpath('//messages')
+
+
+        except Exception as ex:
+            pass
+
         raise DataFailureException(url, response.status, response.data)
 
     tree = etree.fromstring(response.data.strip())

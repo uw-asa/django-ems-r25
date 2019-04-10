@@ -2,6 +2,8 @@ import json
 import logging
 import re
 
+from restclients_core.exceptions import DataFailureException
+
 from ...utils import create_r25_reservation
 from .exceptions import InvalidParamException
 from . import RESTDispatch
@@ -36,6 +38,9 @@ class Reservation(RESTDispatch):
             })
         except InvalidParamException as ex:
             return self.error_response(400, "%s" % ex)
+        except DataFailureException as ex:
+            return self.error_response(
+                500, "Unable to save reservation: %s" % ex)
         except Exception as ex:
             return self.error_response(
                 500, "Unable to save reservation: %s" % ex)

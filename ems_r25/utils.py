@@ -109,30 +109,51 @@ def create_r25_reservation(event_data):
 
     enode = event_tree.xpath("r25:event", namespaces=nsmap)[0]
     event_id = enode.xpath("r25:event_id", namespaces=nsmap)[0].text
+    enode.attrib['status'] = 'mod'
 
-    # enode.attrib['status'] = 'mod'
+    enode.xpath("r25:event_name", namespaces=nsmap)[0].text = \
+        "AT_EMS_Rsrv_%s" % event_data['reservation_id']
+    enode.xpath("r25:event_title", namespaces=nsmap)[0].text = \
+        event_data['event_name']
+    enode.xpath("r25:event_priority", namespaces=nsmap)[0].text = "0"
+    enode.xpath("r25:favorite", namespaces=nsmap)[0].text = "F"
+    enode.xpath("r25:node_type", namespaces=nsmap)[0].text = "E"
+    enode.xpath("r25:start_date", namespaces=nsmap)[0].text = \
+        event_data['start_time'].split('T', 1)[0]
+    enode.xpath("r25:end_date", namespaces=nsmap)[0].text = \
+        event_data['end_time'].split('T', 1)[0]
+    enode.xpath("r25:event_type_id", namespaces=nsmap)[0].text = "402"
+    enode.xpath("r25:state", namespaces=nsmap)[0].text = "0"
+    enode.xpath("r25:version_number", namespaces=nsmap)[0].text = "1"
 
-    element = enode.xpath("r25:node_type", namespaces=nsmap)[0]
-    element.text = 'E'
+    etextnode = enode.xpath("r25:event_text[r25:text_type_name='Description']",
+                            namespaces=nsmap)[0]
+    etextnode.attrib['status'] = 'mod'
+    etextnode.xpath("r25:text", namespaces=nsmap)[0].text = 'event_description'
 
-    # Required information:
-    # Event Name
-    # Event Type
-    # Primary Organization
+    # onode = enode.xpath("r25:organization", namespaces=nsmap)[0]
+    # onode.attrib['status'] = 'mod'
+    # onode.xpath("r25:organization_id", namespaces=nsmap)[0].text = "4211"
+    # onode.xpath("r25:primary", namespaces=nsmap)[0].text = "T"
 
-    # element = enode.xpath("r25:event_name", namespaces=nsmap)[0]
-    # element.text = event_data['event_name']
+    node = enode.xpath("r25:profile", namespaces=nsmap)[0]
+    node.attrib['status'] = 'mod'
+    node.xpath("r25:profile_name", namespaces=nsmap)[0].text = \
+        "AT_EMS_Book_%s" % event_data['booking_id']
 
-    element = enode.xpath("r25:event_type_id", namespaces=nsmap)[0]
-    element.text = "402"
+    node = node.xpath("r25:reservation", namespaces=nsmap)[0]
+    node.attrib['status'] = 'mod'
 
-    onode = enode.xpath("r25:organization", namespaces=nsmap)[0]
-    element = onode.xpath("r25:organization_id", namespaces=nsmap)[0]
-    element.text = "4211"
-    # element = onode.xpath("r25:primary", namespaces=nsmap)[0]
-    # element.text = "T"
+    node.xpath("r25:reservation_start_dt", namespaces=nsmap)[0].text = \
+        event_data['start_time']
+    node.xpath("r25:reservation_end_dt", namespaces=nsmap)[0].text = \
+        event_data['end_time']
 
-    # Add reservation details (date and time) and space_reservation(s)
+    node = node.xpath("r25:space_reservation", namespaces=nsmap)[0]
+    node.attrib['status'] = 'mod'
+
+    node.xpath("r25:space_id", namespaces=nsmap)[0].text = \
+        event_data['r25_space_id']
 
     r25_event = update_event(event_id, event_tree)
 
