@@ -2,8 +2,11 @@ import json
 import unittest
 
 from django.contrib.auth.models import User
+from django.core.management import call_command
 from django.test import Client
 import pycodestyle
+from restclients_core.models import MockHTTP
+from restclients_core.util.local_cache import local_cache, set_cache_value
 
 
 class TestCodeFormat(unittest.TestCase):
@@ -59,3 +62,18 @@ class EMSR25Test(unittest.TestCase):
         data = json.loads(response.content)
 
         self.assertEquals(len(data), 18)
+
+    @local_cache()
+    def test_ems2r25(self):
+        call_command('ems2r25',
+                     '--start', '2018-12-18',
+                     '--end', '2018-12-18')
+
+        response = MockHTTP()
+        response.status = 201
+        response.data = ''
+        set_cache_value('r25-/r25ws/servlet/wrd/run/events.xml', response)
+
+        call_command('ems2r25', '--update',
+                     '--start', '2018-12-18',
+                     '--end', '2018-12-18')
