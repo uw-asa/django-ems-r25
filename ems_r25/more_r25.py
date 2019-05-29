@@ -1,5 +1,6 @@
 import logging
 from lxml import etree
+from os.path import abspath, dirname
 
 from restclients_core.exceptions import DataFailureException
 from uw_r25 import nsmap, get_resource
@@ -8,6 +9,24 @@ from uw_r25.events import events_from_xml
 
 
 logger = logging.getLogger(__name__)
+
+
+def _edit_mock_response(self, method, url, headers, body, response):
+    if "POST" == method or "PUT" == method:
+        path = "{0}/resources/r25/file{1}.{2}".format(
+            abspath(dirname(__file__)), url, method)
+
+        try:
+            handle = open(path)
+            response.data = handle.read()
+            response.status = 201
+        except IOError:
+            response.status = 404
+    elif "DELETE" == method:
+        response.status = 200
+
+
+R25_DAO._edit_mock_response = _edit_mock_response
 
 
 class R25ErrorException(Exception):
